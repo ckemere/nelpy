@@ -88,17 +88,23 @@ class ResultsContainer(object):
 def load_pkl(fname, zip=True, fileobj=None):
     """Read pickled data from disk, possible decompressing."""
     if fileobj is not None:
-      g = gzip.GzipFile(fileobj=fileobj)  # Decompress data with gzip
-      res = pickle.load(fid)
-
-      return res # calling function should close file
+        try:
+            if (zip):
+                g = gzip.GzipFile(fileobj=fileobj)  # Decompress data with gzip
+                res = pickle.load(g)
+            else:
+                res = pickle.load(fileobj)
+            return res # calling function should close file
+        except IOError:
+            print("Error reading from fileobj.")
+            return None
 
     else:
-      if zip:
-          open = gzip.open
-      with open(fname, "rb") as fid:
-          res = pickle.load(fid)
-      return res
+        if zip:
+            open = gzip.open
+        with open(fname, "rb") as fid:
+            res = pickle.load(fid)
+        return res
 
 def save_pkl(fname, res, zip=True, overwrite=False):
     """Write pickled data to disk, possible compressing."""
